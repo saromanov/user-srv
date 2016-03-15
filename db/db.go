@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	log "github.com/golang/glog"
 	user "github.com/micro/user-srv/proto/account"
 )
 
