@@ -8,7 +8,7 @@ import (
 	"strings"*/
 	"time"
 	"gopkg.in/mgo.v2"
-	//"gopkg.in/mgo.v2/bson"
+	"gopkg.in/mgo.v2/bson"
 
 	user "github.com/saromanov/user-srv/proto/account"
 )
@@ -86,18 +86,12 @@ func Update(user *user.User) error {
 }
 
 func Read(id string) (*user.User, error) {
-	user := &user.User{}
-
-	/*r := st["read"].QueryRow(id)
-	var s, p string
-	if err := r.Scan(&user.Id, &user.Username, &user.Email, &s, &p, &user.Created, &user.Updated); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("not found")
-		}
+	var u user.User
+	err := coll.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&u)
+	if err != nil {
 		return nil, err
-	}*/
-
-	return user, nil
+	}
+	return &u, nil
 }
 
 func Search(username, email string, limit, offset int64) ([]*user.User, error) {
