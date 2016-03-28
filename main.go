@@ -5,9 +5,9 @@ import (
 
 	"github.com/micro/cli"
 	"github.com/micro/go-micro"
-	"github.com/micro/user-srv/db"
-	"github.com/micro/user-srv/handler"
-	proto "github.com/micro/user-srv/proto/account"
+	"github.com/saromanov/user-srv/db"
+	"github.com/saromanov/user-srv/handler"
+	proto "github.com/saromanov/user-srv/proto/account"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 
 		micro.Action(func(c *cli.Context) {
 			if len(c.String("database_url")) > 0 {
-				db.Url = c.String("database_url")
+				//db.Url = c.String("database_url")
 			}
 		}),
 	)
