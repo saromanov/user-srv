@@ -140,39 +140,8 @@ func UpdatePassword(id string, salt string, password string) error {
 }
 
 func SaltAndPassword(username, email string) (string, string, error) {
-	//var r *sql.Rows
-	/*var err error
-
-	if len(username) > 0 && len(email) > 0 {
-		r, err = st["searchUsernameAndEmail"].Query(username, email, 1, 0)
-	} else if len(username) > 0 {
-		r, err = st["searchUsername"].Query(username, 1, 0)
-	} else if len(email) > 0 {
-		r, err = st["searchEmail"].Query(email, 1, 0)
-	} else {
-		return "", "", errors.New("username and email cannot be blank")
-	}
-
-	if err != nil {
-		return "", "", err
-	}
-	defer r.Close()
-
-	if !r.Next() {
-		return "", "", errors.New("not found")
-	}*/
 
 	var salt, pass string
-	//user := &user.User{}
-	/*if err := r.Scan(&user.Id, &user.Username, &user.Email, &salt, &pass, &user.Created, &user.Updated); err != nil {
-		if err == sql.ErrNoRows {
-			return "", "", errors.New("not found")
-		}
-		return "", "", err
-	}
-	if r.Err() != nil {
-		return "", "", err
-	}*/
 
 	return salt, pass, nil
 }
