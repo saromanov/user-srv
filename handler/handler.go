@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"crypto/rand"
 	"encoding/base64"
 	"strings"
@@ -46,6 +47,20 @@ func (s *Account) Create(ctx context.Context, req *account.CreateRequest, rsp *a
 
 	req.User.Username = strings.ToLower(req.User.Username)
 	req.User.Email = strings.ToLower(req.User.Email)
+
+	//Generate API ID and Secret
+	unix32bits := uint32(time.Now().UTC().Unix())
+	buff := make([]byte, 12)
+	numRead, err := rand.Read(buff)
+	if numRead != len(buff) || err != nil {
+		rand.Read(buff)
+	}
+	buff2 := make([]byte, 8)
+	rand.Read(buff2)
+	appID := fmt.Sprintf("%x%x@%s", unix32bits, buff2[0:], req.User.Platform)
+	appSecret := fmt.Sprintf("%x-%x-%x-%x-%x-%x", unix32bits, buff[0:2], buff[2:4], buff[4:6], buff[6:8], buff[8:])
+	req.User.AppId = appID
+	req.User.AppSecret = appSecret
 	return db.Create(req.User, salt, pp)
 }
 
