@@ -18,6 +18,9 @@ message User {
 	string email = 3;
 	int64 created = 4;	// unix
 	int64 updated = 5;	// unix
+	string appId = 6;
+	string appSecret = 7;
+	string platform = 8;
 }
 
 message Session {
@@ -29,7 +32,7 @@ message Session {
 
 message CreateRequest {
 	User user = 1;
-        string password = 2;
+    string password = 2;
 }
 
 message CreateResponse {
