@@ -108,6 +108,10 @@ func GetAccounts(limit,skip int)([]user.User, error) {
 	return users, err
 }
 
+func FindAccount(email, pass string) {
+	
+}
+
 func UpdatePassword(id string, salt string, password string) error {
 	//_, err := st["updatePassword"].Exec(salt, password, time.Now().Unix(), id)
 	return nil

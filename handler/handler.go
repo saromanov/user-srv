@@ -10,6 +10,8 @@ import (
 	"io"
 	"crypto/cipher"
 	"encoding/json"
+	"crypto/sha1"
+	"encoding/hex"
 
 	"github.com/micro/go-micro/errors"
 	"github.com/saromanov/user-srv/db"
@@ -131,6 +133,10 @@ func (s *Account) UpdatePassword(ctx context.Context, req *account.UpdatePasswor
 	return nil
 }
 
+func (s *Account) NativeAuth(ctx context.Context, req *account.UpdatePasswordRequest, rsp *account.UpdatePasswordResponse) {
+
+}
+
 func (s *Account) Login(ctx context.Context, req *account.LoginRequest, rsp *account.LoginResponse) error {
 	username := strings.ToLower(req.Username)
 	email := strings.ToLower(req.Email)
@@ -209,5 +215,13 @@ func GenerateToken(id string, name string, org string, platform string, role str
 	stream.XORKeyStream(ciphertext[aes.BlockSize:], pJson)
 
 	return fmt.Sprintf("%x", ciphertext), nil
+}
+
+// HashPassword hash the passed password using sha1
+func HashPassword(pass string) string {
+	h := sha1.New()
+	h.Write([]byte(pass))
+	sha1Hash := hex.EncodeToString(h.Sum(nil))
+	return sha1Hash
 }
 
