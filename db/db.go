@@ -6,6 +6,7 @@ import (
 	/*"fmt"
 	"log"
 	"strings"*/
+	"fmt"
 	"time"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -75,7 +76,14 @@ func Create(user *user.User, salt string, password string) error {
 }
 
 func Delete(id string) error {
-	//_, err := st["delete"].Exec(id)
+	if !bson.IsObjectIdHex(id) {
+		return fmt.Errorf("%s is not a ObjectId value", id)
+	}
+
+	err := coll.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
