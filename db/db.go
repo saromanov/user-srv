@@ -102,6 +102,11 @@ func Read(id string) (*user.User, error) {
 	return &u, nil
 }
 
+func GetAccounts(limit,skip int)([]user.User, error) {
+	var users []user.User
+	err := coll.Find(bson.M{}).Skip(skip).Limit(limit).All(&users)
+	return users, err
+}
 
 func UpdatePassword(id string, salt string, password string) error {
 	//_, err := st["updatePassword"].Exec(salt, password, time.Now().Unix(), id)
