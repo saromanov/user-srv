@@ -102,45 +102,6 @@ func Read(id string) (*user.User, error) {
 	return &u, nil
 }
 
-func Search(username, email string, limit, offset int64) ([]*user.User, error) {
-	/*var r *sql.Rows
-	var err error
-
-	if len(username) > 0 && len(email) > 0 {
-		r, err = st["searchUsernameAndEmail"].Query(username, email, limit, offset)
-	} else if len(username) > 0 {
-		r, err = st["searchUsername"].Query(username, limit, offset)
-	} else if len(email) > 0 {
-		r, err = st["searchEmail"].Query(email, limit, offset)
-	} else {
-		r, err = st["list"].Query(limit, offset)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()*/
-
-	var users []*user.User
-
-	/*for r.Next() {
-		user := &user.User{}
-		var s, p string
-		if err := r.Scan(&user.Id, &user.Username, &user.Email, &s, &p, &user.Created, &user.Updated); err != nil {
-			if err == sql.ErrNoRows {
-				return nil, errors.New("not found")
-			}
-			return nil, err
-		}
-		users = append(users, user)
-
-	}
-	if r.Err() != nil {
-		return nil, err
-	}*/
-
-	return users, nil
-}
 
 func UpdatePassword(id string, salt string, password string) error {
 	//_, err := st["updatePassword"].Exec(salt, password, time.Now().Unix(), id)

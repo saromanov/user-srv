@@ -69,11 +69,11 @@ func (s *Account) Delete(ctx context.Context, req *account.DeleteRequest, rsp *a
 }
 
 func (s *Account) Search(ctx context.Context, req *account.SearchRequest, rsp *account.SearchResponse) error {
-	users, err := db.Search(req.Username, req.Email, req.Limit, req.Offset)
+	/*users, err := db.Search(req.Username, req.Email, req.Limit, req.Offset)
 	if err != nil {
 		return err
 	}
-	rsp.Users = users
+	rsp.Users = users*/
 	return nil
 }
 
