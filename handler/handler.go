@@ -6,6 +6,10 @@ import (
 	"encoding/base64"
 	"strings"
 	"time"
+	"crypto/aes"
+	"io"
+	"crypto/cipher"
+	"encoding/json"
 
 	"github.com/micro/go-micro/errors"
 	"github.com/saromanov/user-srv/db"
@@ -21,7 +25,9 @@ const (
 
 var (
 	alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+	cypherKey = "hghjgYG#t7@3t6iyg%7h^$gghhtg&&*k"
 )
+
 
 func random(i int) string {
 	bytes := make([]byte, i)
@@ -169,3 +175,39 @@ func (s *Account) ReadSession(ctx context.Context, req *account.ReadSessionReque
 	rsp.Session = sess
 	return nil
 }
+
+//Generate a token
+func GenerateToken(id string, name string, org string, platform string, role string, email string, expiry int64, whitelistToPlatform bool) (string, error) {
+	expiry = expiry + time.Now().Unix()
+	payload := map[string]interface{}{
+		"id": id,
+		"name": name,
+		"organization": org,
+		"platform": platform,
+		"role": role,
+		"email":email,
+		"expiry": expiry,
+		"wtp": whitelistToPlatform,
+	}
+	pJson, err := json.Marshal(payload)
+	if err != nil {
+		return "", err
+	}
+
+	key := []byte(cypherKey)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	ciphertext := make([]byte, aes.BlockSize + len(pJson))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return "", err
+	}
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(ciphertext[aes.BlockSize:], pJson)
+
+	return fmt.Sprintf("%x", ciphertext), nil
+}
+
