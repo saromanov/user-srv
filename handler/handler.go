@@ -17,6 +17,7 @@ import (
 	"github.com/saromanov/user-srv/db"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
+	"gopkg.in/mgo.v2/bson"
 
 	account "github.com/saromanov/user-srv/proto/account"
 )
@@ -52,7 +53,8 @@ func (s *Account) Create(ctx context.Context, req *account.CreateRequest, rsp *a
 		return errors.InternalServerError("go.micro.srv.user.Create", err.Error())
 	}
 	pp := base64.StdEncoding.EncodeToString(h)
-
+	id := bson.NewObjectId()
+	req.User.Id = id.Hex()
 	req.User.Username = strings.ToLower(req.User.Username)
 	req.User.Email = strings.ToLower(req.User.Email)
 
@@ -69,7 +71,13 @@ func (s *Account) Create(ctx context.Context, req *account.CreateRequest, rsp *a
 	appSecret := fmt.Sprintf("%x-%x-%x-%x-%x-%x", unix32bits, buff[0:2], buff[2:4], buff[4:6], buff[6:8], buff[8:])
 	req.User.AppId = appID
 	req.User.AppSecret = appSecret
-	return db.Create(req.User, salt, pp)
+	rsp.Id = id.Hex()
+	err = db.Create(req.User, salt, pp)
+	if err != nil {
+		return errors.InternalServerError("go.micro.srv.user.Create", err.Error())
+	}
+
+	return nil
 }
 
 func (s *Account) Read(ctx context.Context, req *account.ReadRequest, rsp *account.ReadResponse) error {

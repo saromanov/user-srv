@@ -80,7 +80,7 @@ func Delete(id string) error {
 		return fmt.Errorf("%s is not a ObjectId value", id)
 	}
 
-	err := coll.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+	err := coll.Remove(bson.M{"id": bson.ObjectIdHex(id)})
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func UpdateName(email, oldname, name string) error {
 
 func Read(id string) (*user.User, error) {
 	var u user.User
-	err := coll.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&u)
+	err := coll.Find(bson.M{"id": bson.ObjectIdHex(id)}).One(&u)
 	if err != nil {
 		return nil, err
 	}

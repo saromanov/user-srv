@@ -118,7 +118,7 @@ func InitRestful() {
 
 	// setup Greeter Server Client
 	cl = account.NewAccountClient("go.micro.srv.user", client.DefaultClient)
-	
+
 	http.HandleFunc("/accounts/name", Update)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8081", nil)
 }

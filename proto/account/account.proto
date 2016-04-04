@@ -37,6 +37,7 @@ message CreateRequest {
 }
 
 message CreateResponse {
+	string id = 1;
 }
 
 message DeleteRequest {
