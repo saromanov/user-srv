@@ -6,6 +6,7 @@ import (
 	/*"fmt"
 	"log"
 	"strings"*/
+	"log"
 	"fmt"
 	"time"
 	"gopkg.in/mgo.v2"
@@ -94,6 +95,9 @@ func Search()([]*user.User, error) {
 
 func UpdateName(email, oldname, name string) error {
 	var acc user.User
+	log.Print("email: ", email)
+	log.Print("oldname: ", oldname)
+	log.Print("newname: ", name)
 	err := coll.Find(bson.M{"email": email, "username": oldname}).One(&acc)
 	if err != nil {
 		return err
