@@ -18,6 +18,7 @@ type User struct {
 	Country             string        `json:"Country" valid:"ascii"`
 	Zip                 string        `json:"Zip" valid:"ascii"`
 	Password            string        `json:"Password" valid:"ascii,required"`
+	Salt                string        `json:"Salt" valid:"ascii,required"`
 	ProfilePhoto        string        `json:"ProfilePhoto" valid:"ascii"`
 	PromoCodeID         string        `json:"PromoCodeId" valid:"ascii"`
 	JoinMailList        bool          `json:"JoinMailList"`

@@ -15,6 +15,7 @@ import (
 
 	"github.com/micro/go-micro/errors"
 	"github.com/saromanov/user-srv/db"
+	"github.com/saromanov/user-srv/producer"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"gopkg.in/mgo.v2/bson"
@@ -77,6 +78,7 @@ func (s *Account) Create(ctx context.Context, req *account.CreateRequest, rsp *a
 		return errors.InternalServerError("go.micro.srv.user.Create", err.Error())
 	}
 
+	producer.Publish(map[string]string{"id": id.Hex()})
 	return nil
 }
 
@@ -96,7 +98,12 @@ func (s *Account) Update(ctx context.Context, req *account.UpdateRequest, rsp *a
 }
 
 func (s *Account) UpdateName(ctx context.Context, req *account.UpdateNameRequest, rsp *account.UpdateNameResponse ) error {
-	return db.UpdateName(req.Email, req.Oldusername, req.Username)
+	err := db.UpdateName(req.Email, req.Oldusername, req.Username)
+	if err != nil {
+		return errors.InternalServerError("go.micro.srv.user.updatename", err.Error())
+	}
+
+	return nil
 }
 
 func (s *Account) Delete(ctx context.Context, req *account.DeleteRequest, rsp *account.DeleteResponse) error {
@@ -104,11 +111,11 @@ func (s *Account) Delete(ctx context.Context, req *account.DeleteRequest, rsp *a
 }
 
 func (s *Account) Search(ctx context.Context, req *account.SearchRequest, rsp *account.SearchResponse) error {
-	/*users, err := db.Search(req.Username, req.Email, req.Limit, req.Offset)
+	users, err := db.Search()
 	if err != nil {
-		return err
+		return errors.InternalServerError("go.micro.srv.user.search", err.Error())
 	}
-	rsp.Users = users*/
+	rsp.Users = users
 	return nil
 }
 
@@ -178,6 +185,7 @@ func (s *Account) Login(ctx context.Context, req *account.LoginRequest, rsp *acc
 		return errors.InternalServerError("go.micro.srv.user.Login", err.Error())
 	}
 	rsp.Session = sess
+	producer.Publish(map[string]string{"Action": "login", "Username": username})
 	return nil
 }
 

@@ -8,6 +8,7 @@ import (
 	"github.com/saromanov/user-srv/db"
 	"github.com/saromanov/user-srv/handler"
 	"github.com/saromanov/user-srv/restful"
+	"github.com/saromanov/user-srv/producer"
 	proto "github.com/saromanov/user-srv/proto/account"
 )
 
@@ -32,6 +33,7 @@ func main() {
 	service.Init()
 	db.Init()
 	go restful.InitRestful()
+	go producer.InitProducer()
 
 	proto.RegisterAccountHandler(service.Server(), new(handler.Account))
 

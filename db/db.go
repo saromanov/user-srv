@@ -93,18 +93,28 @@ func Update(user *user.User) error {
 	return nil
 }
 
+func Search()([]*user.User, error) {
+	var acc []*user.User
+	err := coll.Find(bson.M{}).All(&acc)
+	if err != nil {
+		return acc, err
+	}
+
+	return acc, nil
+}
+
 func UpdateName(email, oldname, name string) error {
 	var acc user.User
 	err := coll.Find(bson.M{"email": email, "username": oldname}).One(&acc)
 	if err != nil {
 		return err
 	}
-	return coll.Update(bson.M{"email": email, "username": oldname}, bson.M{"username": name})
+	return coll.Update(bson.M{"email": email, "username": oldname}, bson.M{"$set":bson.M{"username": name}})
 }
 
 func Read(id string) (*user.User, error) {
 	var u user.User
-	err := coll.Find(bson.M{"id": bson.ObjectIdHex(id)}).One(&u)
+	err := coll.Find(bson.M{"id": id}).One(&u)
 	if err != nil {
 		return nil, err
 	}
