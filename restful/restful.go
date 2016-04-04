@@ -55,7 +55,7 @@ func InitRestful() {
 	ws.Consumes(restful.MIME_XML, restful.MIME_JSON)
 	ws.Produces(restful.MIME_JSON, restful.MIME_XML)
 	ws.Path("/accounts")
-	ws.Route(ws.GET("/name").To(say.UpdateName))
+	ws.Route(ws.POST("/name").To(say.UpdateName))
 	wc.Add(ws)
 
 	// Register Handler
