@@ -53,17 +53,6 @@ func DeleteSession(id string) error {
 }
 
 func ReadSession(id string) (*user.Session, error) {
-	/*sess := &user.Session{}
-
-	r := st["readSession"].QueryRow(id)
-	if err := r.Scan(&sess.Id, &sess.Username, &sess.Created, &sess.Expires); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("not found")
-		}
-		return nil, err
-	}
-
-	return sess, nil*/
 	return nil, nil
 }
 
@@ -110,6 +99,16 @@ func UpdateName(email, oldname, name string) error {
 		return err
 	}
 	return coll.Update(bson.M{"email": email, "username": oldname}, bson.M{"$set":bson.M{"username": name}})
+}
+
+func GetPassword(email,username string) (string, string, error) {
+	var acc user.User
+	err := coll.Find(bson.M{"email": email}).One(&acc)
+	if err != nil {
+		return "", "", err
+	}
+
+	return acc.Password, acc.Username, nil
 }
 
 func Read(id string) (*user.User, error) {

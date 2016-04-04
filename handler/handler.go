@@ -48,14 +48,16 @@ func random(i int) string {
 type Account struct{}
 
 func (s *Account) Create(ctx context.Context, req *account.CreateRequest, rsp *account.CreateResponse) error {
-	salt := random(16)
-	h, err := bcrypt.GenerateFromPassword([]byte(x+salt+req.Password), 10)
+	//salt := random(16)
+	//h, err := bcrypt.GenerateFromPassword([]byte(x+salt+req.Password), 10)
+	h, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
 	if err != nil {
 		return errors.InternalServerError("go.micro.srv.user.Create", err.Error())
 	}
 	pp := base64.StdEncoding.EncodeToString(h)
 	id := bson.NewObjectId()
 	req.User.Id = id.Hex()
+	req.User.Password = pp
 	req.User.Username = strings.ToLower(req.User.Username)
 	req.User.Email = strings.ToLower(req.User.Email)
 
@@ -73,7 +75,8 @@ func (s *Account) Create(ctx context.Context, req *account.CreateRequest, rsp *a
 	req.User.AppId = appID
 	req.User.AppSecret = appSecret
 	rsp.Id = id.Hex()
-	err = db.Create(req.User, salt, pp)
+	err = db.Create(req.User, "", "")
+	//err = db.Create(req.User, salt, pp)
 	if err != nil {
 		return errors.InternalServerError("go.micro.srv.user.Create", err.Error())
 	}
@@ -157,10 +160,10 @@ func (s *Account) NativeAuth(ctx context.Context, req *account.UpdatePasswordReq
 }
 
 func (s *Account) Login(ctx context.Context, req *account.LoginRequest, rsp *account.LoginResponse) error {
-	username := strings.ToLower(req.Username)
+	//username := strings.ToLower(req.Username)
 	email := strings.ToLower(req.Email)
 
-	salt, hashed, err := db.SaltAndPassword(username, email)
+	/*salt, hashed, err := db.SaltAndPassword(username, email)
 	if err != nil {
 		return err
 	}
@@ -168,9 +171,19 @@ func (s *Account) Login(ctx context.Context, req *account.LoginRequest, rsp *acc
 	hh, err := base64.StdEncoding.DecodeString(hashed)
 	if err != nil {
 		return errors.InternalServerError("go.micro.srv.user.Login", err.Error())
+	}*/
+
+	hh, username, err := db.GetPassword(email, "")
+	if err != nil {
+		return errors.InternalServerError("go.micro.srv.user.Login", err.Error())
 	}
 
-	if err := bcrypt.CompareHashAndPassword(hh, []byte(x+salt+req.Password)); err != nil {
+	pass, err := base64.StdEncoding.DecodeString(hh)
+	if err != nil {
+		return errors.InternalServerError("go.micro.srv.user.Login", err.Error())
+	}
+
+	if err := bcrypt.CompareHashAndPassword(pass, []byte(req.Password)); err != nil {
 		return errors.Unauthorized("go.micro.srv.user.login", err.Error())
 	}
 	// save session
