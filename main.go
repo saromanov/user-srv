@@ -7,6 +7,7 @@ import (
 	"github.com/micro/go-micro"
 	"github.com/saromanov/user-srv/db"
 	"github.com/saromanov/user-srv/handler"
+	"github.com/saromanov/user-srv/restful"
 	proto "github.com/saromanov/user-srv/proto/account"
 )
 
@@ -30,6 +31,7 @@ func main() {
 
 	service.Init()
 	db.Init()
+	go restful.InitRestful()
 
 	proto.RegisterAccountHandler(service.Server(), new(handler.Account))
 
