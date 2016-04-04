@@ -3,6 +3,7 @@ syntax = "proto3";
 service Account {
 	rpc Create(CreateRequest) returns (CreateResponse) {}
 	rpc Read(ReadRequest) returns (ReadResponse) {}
+	rpc UpdateName(UpdateNameRequest) returns (UpdateNameResponse) {}
 	rpc Update(UpdateRequest) returns (UpdateResponse) {}
 	rpc Delete(DeleteRequest) returns (DeleteResponse) {}
 	rpc Search(SearchRequest) returns (SearchResponse) {}
@@ -58,6 +59,16 @@ message UpdateRequest {
 }
 
 message UpdateResponse {
+}
+
+message UpdateNameRequest {
+	string email = 1;
+	string oldusername = 2;
+	string username = 3;
+}
+
+message UpdateNameResponse {
+	
 }
 
 message UpdatePasswordRequest {

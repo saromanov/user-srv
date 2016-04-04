@@ -87,6 +87,10 @@ func (s *Account) Update(ctx context.Context, req *account.UpdateRequest, rsp *a
 	return db.Update(req.User)
 }
 
+func (s *Account) UpdateName(ctx context.Context, req *account.UpdateNameRequest, rsp *account.UpdateNameResponse ) error {
+	return db.UpdateName(req.Email, req.Oldusername, req.Username)
+}
+
 func (s *Account) Delete(ctx context.Context, req *account.DeleteRequest, rsp *account.DeleteResponse) error {
 	return db.Delete(req.Id)
 }
