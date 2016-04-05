@@ -1,14 +1,14 @@
 syntax = "proto3";
 
 service Account {
-	rpc Create(CreateRequest) returns (CreateResponse) {}
+	rpc Create(User) returns (CreateResponse) {}
 	rpc Read(ReadRequest) returns (ReadResponse) {}
 	rpc UpdateName(UpdateNameRequest) returns (UpdateNameResponse) {}
 	rpc Update(UpdateRequest) returns (UpdateResponse) {}
 	rpc Delete(DeleteRequest) returns (DeleteResponse) {}
 	rpc Search(SearchRequest) returns (SearchResponse) {}
 	rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordResponse) {}
-	rpc Login(LoginRequest) returns (LoginResponse) {}
+	rpc LoginNative(LoginRequest) returns (LoginResponse) {}
 	rpc Logout(LogoutRequest) returns (LogoutResponse) {}
 	rpc ReadSession(ReadSessionRequest) returns(ReadSessionResponse) {}
 }
@@ -55,8 +55,37 @@ message Session {
 }
 
 message CreateRequest {
-	User user = 1;
-    string password = 2;
+	string id = 1;		// uuid
+	string username = 2;	// alphanumeric user or org
+	string email = 3;
+	int64 created = 4;	// unix
+	int64 updated = 5;	// unix
+	string appId = 6;
+	string appSecret = 7;
+	string platform = 8;
+	string password = 9;
+	string mobileNumber = 10;
+	string phoneNumber = 11;
+	bool receiveNotification = 12;
+	string address = 13;
+	string city = 14;
+	string state = 15;  
+	string country = 16; 
+	string zip = 17;
+	string salt = 18;
+	string profilePhoto = 19; 
+	string promoCodeID = 20;
+	bool joinMailList = 21;
+	string organization = 22;
+	repeated string whitelistHosts = 23;
+	repeated string whitelistIPs = 24;
+	string subscriptionStart = 25;
+	double subscriptionEnd = 26;
+	string subscriptionPlan = 27;
+	bool isSubscriptionValid = 28;
+	string role = 29;
+	bool isEnabled = 30;
+	bool isVerified = 31;
 }
 
 message CreateResponse {

@@ -47,7 +47,7 @@ func random(i int) string {
 
 type Account struct{}
 
-func (s *Account) Create(ctx context.Context, req *account.CreateRequest, rsp *account.CreateResponse) error {
+func (s *Account) Create(ctx context.Context, req *account.User, rsp *account.CreateResponse) error {
 	//salt := random(16)
 	//h, err := bcrypt.GenerateFromPassword([]byte(x+salt+req.Password), 10)
 	h, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
@@ -56,10 +56,10 @@ func (s *Account) Create(ctx context.Context, req *account.CreateRequest, rsp *a
 	}
 	pp := base64.StdEncoding.EncodeToString(h)
 	id := bson.NewObjectId()
-	req.User.Id = id.Hex()
-	req.User.Password = pp
-	req.User.Username = strings.ToLower(req.User.Username)
-	req.User.Email = strings.ToLower(req.User.Email)
+	req.Id = id.Hex()
+	req.Password = pp
+	req.Username = strings.ToLower(req.Username)
+	req.Email = strings.ToLower(req.Email)
 
 	//Generate API ID and Secret
 	unix32bits := uint32(time.Now().UTC().Unix())
@@ -70,12 +70,12 @@ func (s *Account) Create(ctx context.Context, req *account.CreateRequest, rsp *a
 	}
 	buff2 := make([]byte, 8)
 	rand.Read(buff2)
-	appID := fmt.Sprintf("%x%x@%s", unix32bits, buff2[0:], req.User.Platform)
+	appID := fmt.Sprintf("%x%x@%s", unix32bits, buff2[0:], req.Platform)
 	appSecret := fmt.Sprintf("%x-%x-%x-%x-%x-%x", unix32bits, buff[0:2], buff[2:4], buff[4:6], buff[6:8], buff[8:])
-	req.User.AppId = appID
-	req.User.AppSecret = appSecret
+	req.AppId = appID
+	req.AppSecret = appSecret
 	rsp.Id = id.Hex()
-	err = db.Create(req.User, "", "")
+	err = db.Create(req, "", "")
 	//err = db.Create(req.User, salt, pp)
 	if err != nil {
 		return errors.InternalServerError("go.micro.srv.user.Create", err.Error())
@@ -159,7 +159,7 @@ func (s *Account) NativeAuth(ctx context.Context, req *account.UpdatePasswordReq
 
 }
 
-func (s *Account) Login(ctx context.Context, req *account.LoginRequest, rsp *account.LoginResponse) error {
+func (s *Account) LoginNative(ctx context.Context, req *account.LoginRequest, rsp *account.LoginResponse) error {
 	//username := strings.ToLower(req.Username)
 	email := strings.ToLower(req.Email)
 

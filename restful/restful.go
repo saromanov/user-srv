@@ -1,6 +1,7 @@
 package restful
 
 import (
+	"fmt"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -109,6 +110,43 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func Create(w http.ResponseWriter, r *http.Request) {
+	var req account.User
+	var err error
+
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	resp, err := cl.Create(context.TODO(), &req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	if err != nil {
+		log.Print(fmt.Sprintf("%v", err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	result, err := json.Marshal(resp)
+	if err != nil {
+		log.Print(fmt.Sprintf("%v", err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, string(result))
+}
+
+func LoginNative(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func InitRestful() {
 	service := web.NewService(
 		web.Name("go.micro.srv.user"),
@@ -120,5 +158,6 @@ func InitRestful() {
 	cl = account.NewAccountClient("go.micro.srv.user", client.DefaultClient)
 
 	http.HandleFunc("/accounts/name", Update)
+	http.HandleFunc("/accounts/user/create", Create)
 	http.ListenAndServe(":8081", nil)
 }
