@@ -1,3 +1,5 @@
-FROM alpine:3.2
-ADD user-srv /user-srv
-ENTRYPOINT [ "/user-srv" ]
+FROM golang
+
+ADD . /go/src/github.com/saromanov/user-srv
+RUN ./build.sh
+ENTRYPOINT /go/bin/user-srv
