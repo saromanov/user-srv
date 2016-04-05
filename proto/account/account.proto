@@ -23,6 +23,28 @@ message User {
 	string appSecret = 7;
 	string platform = 8;
 	string password = 9;
+	string mobileNumber = 10;
+	string phoneNumber = 11;
+	bool receiveNotification = 12;
+	string address = 13;
+	string city = 14;
+	string state = 15;  
+	string country = 16; 
+	string zip = 17;
+	string salt = 18;
+	string profilePhoto = 19; 
+	string promoCodeID = 20;
+	bool joinMailList = 21;
+	string organization = 22;
+	repeated string whitelistHosts = 23;
+	repeated string whitelistIPs = 24;
+	string subscriptionStart = 25;
+	double subscriptionEnd = 26;
+	string subscriptionPlan = 27;
+	bool isSubscriptionValid = 28;
+	string role = 29;
+	bool isEnabled = 30;
+	bool isVerified = 31;
 }
 
 message Session {
