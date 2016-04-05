@@ -144,7 +144,36 @@ func Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginNative(w http.ResponseWriter, r *http.Request) {
+	var req account.LoginRequest
+	var err error
 
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	resp, err := cl.LoginNative(context.TODO(), &req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	if err != nil {
+		log.Print(fmt.Sprintf("%v", err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	result, err := json.Marshal(resp)
+	if err != nil {
+		log.Print(fmt.Sprintf("%v", err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, string(result))
 }
 
 func InitRestful() {
@@ -159,5 +188,6 @@ func InitRestful() {
 
 	http.HandleFunc("/accounts/name", Update)
 	http.HandleFunc("/accounts/user/create", Create)
+	http.HandleFunc("/accounts/user/auth/native", LoginNative)
 	http.ListenAndServe(":8081", nil)
 }
