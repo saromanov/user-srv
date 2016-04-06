@@ -12,6 +12,8 @@ import (
 
 	micro "github.com/micro/go-micro"
 	proto "github.com/saromanov/user-srv/proto/account"
+	auth  "github.com/saromanov/auth-srv/proto/account"
+	oauth2 "github.com/saromanov/auth-srv/proto/oauth2"
 	//"github/com/saromanov/user-srv/handler"
 	"golang.org/x/net/context"
 )
@@ -80,13 +82,55 @@ func NativeLoginREST(email, password string) error {
 	return nil
 }
 
-func CreateApp(id, secret string) (string, error) {
-	return "", nil
+func CreateApp(id, secret string) error {
+	// Create a new service. Optionally include some options here.
+	service := micro.NewService(micro.Name("go.micro.srv.auth"))
+
+	// Create new greeter client
+	greeter := auth.NewAccountClient("go.micro.srv.auth", service.Client())
+
+	_, err := greeter.Create(context.TODO(), &auth.CreateRequest{Account: &auth.Record{ClientId: id, ClientSecret: secret, Type:"user"}})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("New app was created")
+
+	return nil
+}
+
+func Oauth2Authorize(id, secret string) (string, error) {
+	// Create a new service. Optionally include some options here.
+	service := micro.NewService(micro.Name("go.micro.srv.auth"))
+
+	// Create new greeter client
+	greeter := oauth2.NewOauth2Client("go.micro.srv.auth", service.Client())
+
+	rsp, err := greeter.Authorize(context.TODO(), &oauth2.AuthorizeRequest{ClientId: id, State:"mystatetoken", ResponseType:"code", RedirectUri:"https://foo.bar.com"})
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("Code: ", rsp.Code)
+	return rsp.Code, nil
 }
 
 func Oauth2LoginRPC(id, secret, code string) error {
+	// Create a new service. Optionally include some options here.
+	service := micro.NewService(micro.Name("go.micro.srv.auth"))
+
+	// Create new greeter client
+	greeter := oauth2.NewOauth2Client("go.micro.srv.auth", service.Client())
+
+	rsp, err := greeter.Token(context.TODO(), &oauth2.TokenRequest{ClientId: id, ClientSecret: secret, Code:code, GrantType:"authorization_code", RedirectUri:"https://foo.bar.com"})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(rsp.Token)
 	return nil
 }
+
 
 func Oauth2LoginREST(id, secret, code string) error {
 	return nil
@@ -133,15 +177,20 @@ func main() {
 	}
 
 	fmt.Println("\n4. Create new app for RPC auth")
-	code, err := CreateApp(username, pass)
+	err = CreateApp(username, pass)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("\n5. Oauth2 login")
+	fmt.Println("\n5. Oauth2 auth")
+	code, err := Oauth2Authorize(username, pass)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("\n6. Oauth2 login RPC")
 	err = Oauth2LoginRPC(username, pass, code)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
