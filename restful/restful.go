@@ -6,8 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/emicklei/go-restful"
-
+	"github.com/gorilla/mux"
 	"github.com/micro/go-micro/client"
 	"github.com/micro/go-web"
 	"github.com/saromanov/user-srv/proto/account"
@@ -114,16 +113,18 @@ func LoginNative(w http.ResponseWriter, r *http.Request) {
 
 func InitRestful() {
 	service := web.NewService(
-		web.Name("go.micro.srv.user"),
+		web.Name("go.micro.web.user"),
 	)
 
 	service.Init()
+	go service.Run()
 
+	router := mux.NewRouter()
 	// setup Greeter Server Client
 	cl = account.NewAccountClient("go.micro.srv.user", client.DefaultClient)
 
-	http.HandleFunc("/accounts/name", Update)
-	http.HandleFunc("/accounts/user/create", Create)
-	http.HandleFunc("/accounts/user/auth/native", LoginNative)
+	router.HandleFunc("/accounts/name", Update).Methods("POST")
+	router.HandleFunc("/accounts/user/create", Create).Methods("POST")
+	router.HandleFunc("/accounts/user/auth/native", LoginNative).Methods("POST")
 	http.ListenAndServe(":8081", nil)
 }
