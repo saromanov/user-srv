@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -65,15 +66,29 @@ func NativeLoginRPC(email, password string) error {
 func NativeLoginREST(email, password string) error {
 	evreq := &proto.LoginRequest{Email: email, Password: password}
 	res, _ := json.Marshal(evreq)
-	resp, err := postRequest("http://localhost:8081/accounts/user/create", res)
+	resp, err := postRequest("http://localhost:8081/accounts/user/auth/native", res)
 	if err != nil {
 		return err
 	}
-	fmt.Println(resp)
+	var postResp map[string]interface{}
+	body, _ := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(body, &postResp)
+	if err != nil {
+		return err
+	}
+	fmt.Println(postResp)
 	return nil
 }
 
-func Oauth2Login(email, password string) error {
+func CreateApp(id, secret string) (string, error) {
+	return "", nil
+}
+
+func Oauth2LoginRPC(id, secret, code string) error {
+	return nil
+}
+
+func Oauth2LoginREST(id, secret, code string) error {
 	return nil
 }
 
@@ -100,7 +115,7 @@ func postRequest(url string, params []byte) (*http.Response, error) {
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	fmt.Println("1. Create User")
-	_, email, pass, err := CreateUser()
+	username, email, pass, err := CreateUser()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -117,5 +132,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("\n4. Create new app")
+	fmt.Println("\n4. Create new app for RPC auth")
+	code, err := CreateApp(username, pass)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("\n5. Oauth2 login")
+	err = Oauth2LoginRPC(username, pass, code)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
