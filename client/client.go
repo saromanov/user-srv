@@ -1,0 +1,121 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
+	"math/rand"
+	"net/http"
+	"time"
+
+	micro "github.com/micro/go-micro"
+	proto "github.com/saromanov/user-srv/proto/account"
+	//"github/com/saromanov/user-srv/handler"
+	"golang.org/x/net/context"
+)
+
+//Login with rpc, rest, native auth and oauth2
+
+var letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+func CreateUser() (string, string, string, error) {
+	// Create a new service. Optionally include some options here.
+	service := micro.NewService(micro.Name("go.micro.srv.user"))
+
+	// Create new greeter client
+	greeter := proto.NewAccountClient("go.micro.srv.user", service.Client())
+
+	//Generate random username, email and password
+	email := randStringBytes(5) + "@mail.com"
+	username := randStringBytes(7)
+	password := randStringBytes(10)
+	// Call the greeter
+	rsp, err := greeter.Create(context.TODO(), &proto.User{Email: email, Username: username,
+		Password: password})
+	if err != nil {
+		return "", "", "", err
+	}
+
+	// Print response
+	fmt.Println(rsp.Id)
+	fmt.Printf("Username: %s\n", username)
+	fmt.Printf("Email: %s\n", email)
+	fmt.Printf("Password: %s\n", password)
+
+	return username, email, password, nil
+}
+
+func NativeLoginRPC(email, password string) error {
+	// Create a new service. Optionally include some options here.
+	service := micro.NewService(micro.Name("go.micro.srv.user"))
+
+	// Create new greeter client
+	greeter := proto.NewAccountClient("go.micro.srv.user", service.Client())
+
+	rsp, err := greeter.LoginNative(context.TODO(), &proto.LoginRequest{Email: email, Password: password})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(rsp)
+	return nil
+}
+
+func NativeLoginREST(email, password string) error {
+	evreq := &proto.LoginRequest{Email: email, Password: password}
+	res, _ := json.Marshal(evreq)
+	resp, err := postRequest("http://localhost:8081/accounts/user/create", res)
+	if err != nil {
+		return err
+	}
+	fmt.Println(resp)
+	return nil
+}
+
+func Oauth2Login(email, password string) error {
+	return nil
+}
+
+func randStringBytes(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+// postRequest is helpful method for build post requests for microservice
+func postRequest(url string, params []byte) (*http.Response, error) {
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(params))
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
+	fmt.Println("1. Create User")
+	_, email, pass, err := CreateUser()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("\n2. Native login via RPC")
+	err = NativeLoginRPC(email, pass)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("\n3. Native login via REST")
+	err = NativeLoginREST(email, pass)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("\n4. Create new app")
+}
