@@ -46,28 +46,31 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
-	var req account.User
+	var usr account.User
 	var err error
 
 	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
+	err = decoder.Decode(&usr)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	
+	req := client.NewRequest("go.micro.srv.user", "Account.Create", &usr)
+
+	rsp := &account.CreateResponse{}
+	err = client.Call(context.Background(), req, rsp)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	resp, err := cl.Create(context.TODO(), &req)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-	}
-
-	if err != nil {
-		log.Print(fmt.Sprintf("%v", err))
-		w.WriteHeader(http.StatusBadRequest)
+	if err := client.Call(context.Background(), req, rsp); err != nil {
+		fmt.Println(err)
 		return
 	}
 
-	result, err := json.Marshal(resp)
+	result, err := json.Marshal(rsp)
 	if err != nil {
 		log.Print(fmt.Sprintf("%v", err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -124,7 +127,8 @@ func InitRestful() {
 	cl = account.NewAccountClient("go.micro.srv.user", client.DefaultClient)
 
 	router.HandleFunc("/accounts/name", Update).Methods("POST")
-	router.HandleFunc("/accounts/user/create", Create).Methods("POST")
+	//router.HandleFunc("/accounts/user/create", Create).Methods("POST")
+	service.HandleFunc("/accounts/user/create", Create)
 	router.HandleFunc("/accounts/user/auth/native", LoginNative).Methods("POST")
 	http.ListenAndServe(":8081", nil)
 }
