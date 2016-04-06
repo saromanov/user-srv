@@ -22,6 +22,10 @@ func Publish(item map[string]string) error {
 		Body: []byte(fmt.Sprintf("%s", time.Now().String())),
 	}
 
+	if brokerPub.Address() == "" {
+		return fmt.Errorf("Address is not defined")
+	}
+
 	if err := brokerPub.Publish(topic, msg); err != nil {
 		return err
 	}
