@@ -116,6 +116,18 @@ func Oauth2Authorize(id, secret string) (string, error) {
 }
 
 func Oauth2LoginRPC(id, secret, code string) error {
+	// Create a new service. Optionally include some options here.
+	service := micro.NewService(micro.Name("go.micro.srv.auth"))
+
+	// Create new greeter client
+	greeter := oauth2.NewOauth2Client("go.micro.srv.auth", service.Client())
+
+	rsp, err := greeter.Token(context.TODO(), &oauth2.TokenRequest{ClientId: id, ClientSecret: secret, Code:code, GrantType:"authorization_code", RedirectUri:"https://foo.bar.com"})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(rsp.Token)
 	return nil
 }
 
@@ -176,6 +188,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("\n6. Oauth2 login")
-	Oauth2LoginRPC(username, pass, code)
+	fmt.Println("\n6. Oauth2 login RPC")
+	err = Oauth2LoginRPC(username, pass, code)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
