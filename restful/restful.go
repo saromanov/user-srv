@@ -55,7 +55,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	req := client.NewRequest("go.micro.srv.user", "Account.Create", &usr)
 
 	rsp := &account.CreateResponse{}
@@ -115,20 +115,21 @@ func LoginNative(w http.ResponseWriter, r *http.Request) {
 }
 
 func InitRestful() {
+	router := mux.NewRouter()
 	service := web.NewService(
 		web.Name("go.micro.web.user"),
+		//web.Handler(router),
 	)
 
 	service.Init()
 	go service.Run()
 
-	router := mux.NewRouter()
 	// setup Greeter Server Client
 	cl = account.NewAccountClient("go.micro.srv.user", client.DefaultClient)
 
 	router.HandleFunc("/accounts/name", Update).Methods("POST")
-	//router.HandleFunc("/accounts/user/create", Create).Methods("POST")
-	service.HandleFunc("/accounts/user/create", Create)
+	router.HandleFunc("/accounts/user/create", Create).Methods("POST")
+	//service.HandleFunc("/accounts/user/create", Create)
 	router.HandleFunc("/accounts/user/auth/native", LoginNative).Methods("POST")
 	http.ListenAndServe(":8081", nil)
 }
